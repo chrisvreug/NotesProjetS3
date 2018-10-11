@@ -1,51 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/status.dart';
+import 'package:meta/meta.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
 
 void main() {
-  runApp(
-      new MaterialApp(
-          home: new MonButton()
-      )
-  );
+  runApp(new MaterialApp(
+    home: new HomePage(),
+  ));
 }
 
-class MonButton extends StatefulWidget {
+class HomePage extends StatefulWidget {
   @override
-  MonButtonState createState() => new MonButtonState();
+  HomePageState createState() => new HomePageState();
 }
 
-class MonButtonState extends State<MonButton> {
+class HomePageState extends State<HomePage> {
 
-  int counter = 0;
-  List<String> strings = ["Ca", "Marche", "Les", "Boys"];
-  String displayedString = "";
+  List data;
 
-  void onPressed() {
-    setState(() {
-      displayedString = strings[counter];
-      counter = counter < 3 ? counter + 1 : 0;
-    });
+  Future<String> getData() async {
+    var response = await http.get(
+        Uri.encodeFull("http://10.0.0.117:8080/test2.json"),
+        headers: {
+          "Accept": "application/json"
+        }
+    );
+    Map<String, dynamic> user = json.decode(response.body);
+
+    print('Howdy, ${user['name']}!');
+    print('We sent the verification link to ${user['email']}.');
+    //data = json.decode(response.body);
+    //print(data);
+    //print(response.body);
+    return "Success!";
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(title: new Text("Notes"), backgroundColor: Colors.deepOrange),
-        body: new Container(
-            child: new Center(
-                child: new Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      new Text(displayedString, style: new TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold)),
-                      new Padding(padding: new EdgeInsets.all(10.0)),
-                      new RaisedButton(
-                          child: new Text("Press me!", style: new TextStyle(color: Colors.white, fontStyle: FontStyle.italic, fontSize: 20.0)),
-                          color: Colors.red,
-                          onPressed: onPressed
-                      )
-                    ]
-                )
-            )
-        )
+      body: new Center(
+        child: new RaisedButton(
+          child: new Text("Get data"),
+          onPressed: getData,
+        ),
+      ),
     );
   }
 }
